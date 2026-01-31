@@ -523,39 +523,9 @@
                 
                 await window.storage.set('valentine-response', JSON.stringify(response), true);
                 console.log('Response saved!');
-                
-                // Send notification to WhatsApp
-                sendWhatsAppNotification(answer, dateChoice);
             } catch (error) {
                 console.log('Could not save response:', error);
             }
-        }
-
-        function sendWhatsAppNotification(answer, dateChoice) {
-            // Your WhatsApp number
-            const YOUR_PHONE_NUMBER = '254768522719';
-            
-            let message = '';
-            
-            if (answer === 'yes') {
-                const dateNames = {
-                    'dinner': '🍝 Romantic Dinner Date',
-                    'arcade': '🎮 Fun Arcade Date',
-                    'movie': '🎬 Cozy Movie Date'
-                };
-                
-                message = `🎉 SHE SAID YES! 💕%0A%0AShe chose: ${dateNames[dateChoice]}%0A%0ATime to plan the perfect date! 😊`;
-            } else {
-                message = `💔 She said no...%0A%0ABut don't give up! Maybe try again later? 🥺`;
-            }
-            
-            // Open WhatsApp with the message - use window.location for better mobile compatibility
-            const whatsappURL = `https://wa.me/${YOUR_PHONE_NUMBER}?text=${message}`;
-            
-            // Try multiple methods for better compatibility
-            setTimeout(() => {
-                window.location.href = whatsappURL;
-            }, 1000);
         }
 
         async function checkResponse() {
