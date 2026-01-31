@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -422,6 +423,7 @@
         <div id="final-message" class="final-message">
             <p>Perfect! I can't wait for our <span id="selected-date"></span>! 💕</p>
             <p style="font-size: 1rem; margin-top: 10px;">See you soon, Valentine! 😊</p>
+            <p style="font-size: 0.9rem; margin-top: 15px; color: #ff69b4; font-weight: 600;">📸 Please screenshot this and send it to me! 💕</p>
         </div>
 
         <!-- Admin Check Response (subtle button) -->
@@ -521,10 +523,57 @@
                     timestamp: new Date().toISOString()
                 };
                 
-                await window.storage.set('valentine-response', JSON.stringify(response), true);
+                // Save to localStorage (works on any browser)
+                localStorage.setItem('valentine-response', JSON.stringify(response));
                 console.log('Response saved!');
+                
+                // Send notification via Telegram
+                sendTelegramNotification(answer, dateChoice);
             } catch (error) {
                 console.log('Could not save response:', error);
+            }
+        }
+
+        async function sendTelegramNotification(answer, dateChoice) {
+            // SETUP INSTRUCTIONS:
+            // 1. Open Telegram and search for @BotFather
+            // 2. Send /newbot and follow instructions to create a bot
+            // 3. Copy the bot token (looks like: 123456789:ABCdefGHIjklMNOpqrsTUVwxyz)
+            // 4. Search for @userinfobot on Telegram
+            // 5. Start a chat with it to get your Chat ID
+            // 6. Replace the values below
+            
+            const BOT_TOKEN = '8319790519:AAG5PgCLp3VQump3ryP7JL2q56vSZUA_fyA'; // From @BotFather
+            const CHAT_ID = '6779480529'; // From @userinfobot
+            
+            const dateNames = {
+                'dinner': '🍝 Romantic Dinner Date',
+                'arcade': '🎮 Fun Arcade Date',
+                'movie': '🎬 Cozy Movie Date'
+            };
+            
+            let message = '';
+            if (answer === 'yes') {
+                message = `🎉 SHE SAID YES! 💕\n\nShe chose: ${dateNames[dateChoice]}\n\nTime to plan the perfect date! 😊`;
+            } else {
+                message = `💔 She said no...\n\nBut don't give up! Maybe try again later? 🥺`;
+            }
+            
+            try {
+                await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        chat_id: CHAT_ID,
+                        text: message,
+                        parse_mode: 'HTML'
+                    })
+                });
+                console.log('Telegram notification sent!');
+            } catch (error) {
+                console.log('Could not send Telegram notification:', error);
             }
         }
 
