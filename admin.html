@@ -1,0 +1,235 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Check Response - Valentine's Card</title>
+    <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Quicksand', sans-serif;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            max-width: 500px;
+            width: 100%;
+            text-align: center;
+        }
+
+        h1 {
+            color: #667eea;
+            margin-bottom: 30px;
+            font-size: 2rem;
+        }
+
+        .status-box {
+            padding: 30px;
+            border-radius: 15px;
+            margin: 20px 0;
+            font-size: 1.2rem;
+        }
+
+        .no-response {
+            background: #f0f0f0;
+            color: #999;
+        }
+
+        .response-yes {
+            background: linear-gradient(135deg, #84fab0 0%, #8fd3f4 100%);
+            color: #006400;
+        }
+
+        .response-no {
+            background: linear-gradient(135deg, #ffeaa7 0%, #fab1a0 100%);
+            color: #d63031;
+        }
+
+        .details {
+            margin-top: 15px;
+            font-size: 1rem;
+            line-height: 1.8;
+        }
+
+        .emoji {
+            font-size: 4rem;
+            margin-bottom: 20px;
+        }
+
+        button {
+            margin-top: 20px;
+            padding: 15px 30px;
+            font-size: 1.1rem;
+            font-weight: 700;
+            border: none;
+            border-radius: 50px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            cursor: pointer;
+            font-family: 'Quicksand', sans-serif;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            transition: all 0.3s ease;
+        }
+
+        button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+        }
+
+        .loading {
+            color: #667eea;
+            font-size: 1.1rem;
+            margin: 20px 0;
+        }
+
+        .instructions {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 30px;
+            text-align: left;
+            font-size: 0.95rem;
+            color: #666;
+            line-height: 1.6;
+        }
+
+        .instructions h3 {
+            color: #667eea;
+            margin-bottom: 10px;
+            font-size: 1.1rem;
+        }
+
+        .instructions ul {
+            margin-left: 20px;
+        }
+
+        .instructions li {
+            margin: 8px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>💕 Valentine Response Checker</h1>
+        
+        <div id="loading" class="loading">
+            Loading response...
+        </div>
+
+        <div id="status-container" style="display: none;">
+            <!-- Status will be displayed here -->
+        </div>
+
+        <button onclick="checkResponse()">🔄 Refresh Response</button>
+
+        <div class="instructions">
+            <h3>📖 How to use:</h3>
+            <ul>
+                <li><strong>Share the main card</strong> (index.html) with your crush</li>
+                <li><strong>Bookmark THIS page</strong> - it's your admin panel</li>
+                <li>When she responds, open this page to see her answer</li>
+                <li>Click "Refresh Response" to check for updates</li>
+                <li><strong>Important:</strong> Both pages must be hosted on the same domain (same Vercel/Netlify site)</li>
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        async function checkResponse() {
+            const loadingDiv = document.getElementById('loading');
+            const statusContainer = document.getElementById('status-container');
+            
+            loadingDiv.style.display = 'block';
+            statusContainer.style.display = 'none';
+            
+            try {
+                const result = await window.storage.get('valentine-response', true);
+                
+                loadingDiv.style.display = 'none';
+                statusContainer.style.display = 'block';
+                
+                if (result && result.value) {
+                    const response = JSON.parse(result.value);
+                    const date = new Date(response.timestamp);
+                    
+                    if (response.answer === 'yes') {
+                        const dateNames = {
+                            'dinner': '🍝 Romantic Dinner Date',
+                            'arcade': '🎮 Fun Arcade Date',
+                            'movie': '🎬 Cozy Movie Date'
+                        };
+                        
+                        statusContainer.innerHTML = `
+                            <div class="status-box response-yes">
+                                <div class="emoji">🎉</div>
+                                <strong style="font-size: 1.5rem;">SHE SAID YES!</strong>
+                                <div class="details">
+                                    <p><strong>Date Choice:</strong> ${dateNames[response.dateChoice]}</p>
+                                    <p><strong>Responded on:</strong><br>${date.toLocaleString()}</p>
+                                </div>
+                            </div>
+                        `;
+                    } else {
+                        statusContainer.innerHTML = `
+                            <div class="status-box response-no">
+                                <div class="emoji">💔</div>
+                                <strong style="font-size: 1.5rem;">She said no</strong>
+                                <div class="details">
+                                    <p><strong>Responded on:</strong><br>${date.toLocaleString()}</p>
+                                    <p style="margin-top: 10px;">Don't give up! Maybe try again later? 🥺</p>
+                                </div>
+                            </div>
+                        `;
+                    }
+                } else {
+                    statusContainer.innerHTML = `
+                        <div class="status-box no-response">
+                            <div class="emoji">⏳</div>
+                            <strong>No response yet</strong>
+                            <div class="details">
+                                <p>She hasn't answered the Valentine's card yet.</p>
+                                <p style="margin-top: 10px;">Check back later! 💕</p>
+                            </div>
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                loadingDiv.style.display = 'none';
+                statusContainer.style.display = 'block';
+                statusContainer.innerHTML = `
+                    <div class="status-box no-response">
+                        <div class="emoji">❌</div>
+                        <strong>Error loading response</strong>
+                        <div class="details">
+                            <p>Make sure this page is hosted on the same domain as the Valentine's card.</p>
+                            <p style="margin-top: 10px; font-size: 0.9rem;">Error: ${error.message}</p>
+                        </div>
+                    </div>
+                `;
+            }
+        }
+
+        // Auto-check on page load
+        window.addEventListener('load', checkResponse);
+
+        // Auto-refresh every 30 seconds
+        setInterval(checkResponse, 30000);
+    </script>
+</body>
+</html>
